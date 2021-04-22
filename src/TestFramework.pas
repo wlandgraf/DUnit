@@ -67,10 +67,18 @@ uses
   IniFiles,
   TypInfo,
 {$ELSE}
+  {$IFDEF PAS2JS}
+  js,
+  SysUtils,
+  Classes,
+  TypInfo,
+  WEBLib.Utils,
+  {$ELSE}
   System.SysUtils,
   System.Classes,
   System.IniFiles,
   System.TypInfo,
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF NEXTGEN}
   System.Generics.Collections,
@@ -113,7 +121,11 @@ type
 {$IFDEF CLR}
   TTestMethod  = string;
 {$ELSE}
+  {$IFDEF PAS2JS}
+  TTestMethod = TJSFunction;
+  {$ELSE}
   TTestMethod  = procedure of object;
+  {$ENDIF}
 {$ENDIF}
   TTestProc    = procedure;
 
@@ -221,11 +233,13 @@ type
     procedure SetStatusListener(Listener :IStatusListener);
     function  GetStatus :string;
 
+    {$IFNDEF PAS2JS}
     procedure LoadConfiguration(const iniFile :TCustomIniFile; const section :string);  overload;
     procedure LoadConfiguration(const fileName: string; const useRegistry, useMemIni: Boolean); overload;
 
     procedure SaveConfiguration(const iniFile :TCustomIniFile; const section :string);  overload;
     procedure SaveConfiguration(const fileName: string; const useRegistry, useMemIni: Boolean); overload;
+    {$ENDIF}
 
     procedure SetGUIObject(const guiObject: TObject);
     function  GetGUIObject: TObject;
@@ -474,7 +488,9 @@ type
     procedure SetFailsOnMemoryLeak(const Value: Boolean);
 
     {$IFNDEF CLR} // related to Check(Not)EqualsMem, pointer based, unsuitable for .NET
+    {$IFNDEF PAS2JS}
     function GetMemDiffStr(expected, actual: pointer; size:longword; msg:string):string;
+    {$ENDIF}
     {$ENDIF}
 
     function  GetAllowedMemoryLeakSize: Integer;
@@ -515,10 +531,12 @@ type
     procedure Status(const Msg :string);
     function  GetStatus :string;
 
+    {$IFNDEF PAS2JS}
     procedure LoadConfiguration(const fileName: string; const useRegistry, useMemIni: Boolean); overload;
     procedure LoadConfiguration(const iniFile :TCustomIniFile; const section :string);  overload; virtual;
     procedure SaveConfiguration(const fileName: string; const useRegistry, useMemIni: Boolean); overload;
     procedure SaveConfiguration(const iniFile :TCustomIniFile; const section :string);  overload; virtual;
+    {$ENDIF}
 
     property Name:    string  read GetName;
     property Enabled: Boolean read GetEnabled write SetEnabled;
@@ -533,22 +551,30 @@ type
     procedure CheckEquals(expected, actual: integer; msg: string = ''); overload; virtual;
     procedure CheckEquals(expected, actual: Cardinal; msg: string = ''); overload; virtual;
     procedure CheckEquals(expected, actual: int64; msg: string = ''); overload; virtual;
+{$IFNDEF PAS2JS}
     procedure CheckEquals(expected, actual: uint64; msg: string = ''); overload; virtual;
+{$ENDIF}
     procedure CheckEquals(expected, actual: string; msg: string = ''); overload; virtual;
 {$IFNDEF NEXTGEN}
+  {$IFNDEF PAS2JS}
     procedure CheckEquals(expected, actual: ShortString; msg: string = ''); overload; virtual;
+  {$ENDIF}
 {$ENDIF NEXTGEN}
     procedure CheckEqualsString(expected, actual: string; msg: string = ''); virtual;
 {$IFNDEF CLR}
 {$IFNDEF NEXTGEN}
 {$IFDEF UNICODE}
+  {$IFNDEF PAS2JS}
     procedure CheckEquals(expected, actual: RawByteString; msg: string = ''); overload; virtual;
+  {$ENDIF}
 {$ELSE !UNICODE}
     procedure CheckEquals(expected, actual: WideString; msg: string = ''); overload; virtual;
 {$ENDIF !UNICODE}
     procedure CheckEqualsWideString(expected, actual: WideString; msg: string = ''); virtual;
 {$ENDIF !NEXTGEN}
+  {$IFNDEF PAS2JS}
     procedure CheckEqualsMem(expected, actual: pointer; size:longword; msg:string=''); virtual;
+  {$ENDIF}
 {$ELSE !CLR}
     procedure CheckEquals(expected, actual: AnsiString; msg: string = ''); overload; virtual;
 {$ENDIF !CLR}
@@ -557,8 +583,10 @@ type
     procedure CheckEqualsHex(expected, actual: longword; msg: string = ''; digits: integer=8); virtual;
 
 {$IFNDEF CLR}
+{$IFNDEF PAS2JS}
     procedure CheckEquals(expected, actual: TCharArray; msg: string = ''); overload; virtual;
 //    procedure CheckEquals(expected, actual: TBytes; msg: string = ''); overload; virtual;
+{$ENDIF}
 {$ENDIF !CLR}
 
 
@@ -568,26 +596,34 @@ type
     procedure CheckNotEquals(expected: extended; actual: extended; delta: extended = 0; msg: string = ''); overload; virtual;
     procedure CheckNotEquals(expected, actual: string; msg: string = ''); overload; virtual;
 {$IFNDEF NEXTGEN}
+  {$IFNDEF PAS2JS}
     procedure CheckNotEquals(expected, actual: ShortString; msg: string = ''); overload; virtual;
+  {$ENDIF}
 {$ENDIF !NEXTGEN}
     procedure CheckNotEqualsString(expected, actual: string; msg: string = ''); virtual;
 {$IFNDEF CLR}
 {$IFNDEF NEXTGEN}
 {$IFDEF UNICODE}
+  {$IFNDEF PAS2JS}
     procedure CheckNotEquals(expected, actual: RawByteString; msg: string = ''); overload; virtual;
+  {$ENDIF}
 {$ELSE !UNICODE}
     procedure CheckNotEquals(const expected, actual: WideString; msg: string = ''); overload; virtual;
 {$ENDIF !UNICODE}
     procedure CheckNotEqualsWideString(const expected, actual: WideString; msg: string = ''); virtual;
 {$ENDIF !NEXTGEN}
+  {$IFNDEF PAS2JS}
     procedure CheckNotEqualsMem(expected, actual: pointer; size:longword; msg:string=''); virtual;
+  {$ENDIF}
 {$ENDIF !CLR}
     procedure CheckNotEquals(expected, actual: Boolean; msg: string = ''); overload; virtual;
     procedure CheckNotEqualsBin(expected, actual: longword; msg: string = ''; digits: integer=32); virtual;
     procedure CheckNotEqualsHex(expected, actual: longword; msg: string = ''; digits: integer=8); virtual;
 
 {$IFNDEF CLR}
+  {$IFNDEF PAS2JS}
     procedure CheckNotEquals(expected, actual: TCharArray; msg: string = ''); overload; virtual;
+  {$ENDIF}
 //    procedure CheckNotEquals(expected, actual: TBytes; msg: string = ''); overload; virtual;
 {$ENDIF !CLR}
 
@@ -644,7 +680,9 @@ type
     procedure StopTests(msg: string = ''); virtual;
 
 {$IFNDEF CLR}
+  {$IFNDEF PAS2JS}
     procedure CheckMethodIsNotEmpty(MethodPointer: pointer);
+  {$ENDIF}
 {$ENDIF}
 
     procedure StartExpectingException(e: ExceptionClass);
@@ -694,7 +732,7 @@ type
     constructor Create(MethodName: string; RunCount: Int64); overload; virtual;
     class function Suite: ITestSuite; virtual;
 
-    procedure Run(testResult: TTestResult); overload;
+    procedure Run(testResult: TTestResult); overload; {$IFDEF PAS2JS}reintroduce;{$ENDIF}
   published
   end;
 
@@ -747,7 +785,9 @@ type
     constructor Create; overload;
     constructor Create(AName: string); overload;
     constructor Create(TestClass: TTestCaseClass); overload;
+{$IFNDEF PAS2JS}
     constructor Create(AName: string; const Tests: array of ITest); overload;
+{$ENDIF}
     function CountTestCases: integer;         override;
     function CountEnabledTestCases: integer;  override;
 
@@ -757,8 +797,10 @@ type
     procedure AddSuite(suite:  ITestSuite);         virtual;
 
 
+{$IFNDEF PAS2JS}
     procedure LoadConfiguration(const iniFile: TCustomIniFile; const section: string);  override;
     procedure SaveConfiguration(const iniFile: TCustomIniFile; const section: string);  override;
+{$ENDIF}
   end;
 
 
@@ -808,19 +850,28 @@ type
 
 
 // creating suites
+{$IFNDEF PAS2JS}
 function  TestSuite(AName: string; const Tests: array of ITest): ITestSuite;
+{$ENDIF}
 
 // test registry
 procedure RegisterTest(SuitePath: string; test: ITest); overload;
 procedure RegisterTest(test: ITest);                    overload;
+{$IFNDEF PAS2JS}
 procedure RegisterTests(SuitePath: string; const Tests: array of ITest);  overload;
 procedure RegisterTests(const Tests: array of ITest);                     overload;
+{$ENDIF}
 function  RegisteredTests: ITestSuite;
 procedure ClearRegistry;
 
 // running tests
+{$IFDEF PAS2JS}
+function RunTest(suite: ITest; const listener: ITestListener): TTestResult; overload;
+function RunRegisteredTests(const listener: ITestListener): TTestResult;
+{$ELSE}
 function RunTest(suite: ITest; const listeners: array of ITestListener): TTestResult; overload;
 function RunRegisteredTests(const listeners: array of ITestListener): TTestResult;
+{$ENDIF}
 
 // Path acquiring routines.
                                                                                           
@@ -839,10 +890,13 @@ function GetApplicationLabel: string;
 {$ENDIF !CONDITIONALEXPRESSIONS}
 
 {$IFNDEF HAS_BUILTIN_RETURNADDRESS}
-function ReturnAddress: Pointer; {$IFNDEF CLR} assembler; {$ENDIF}
+function ReturnAddress: Pointer; {$IFNDEF CLR}{$IFNDEF PAS2JS} assembler; {$ENDIF}{$ENDIF}
 {$ENDIF}
-function CallerAddr: Pointer; {$IFNDEF CLR} assembler; {$ENDIF}
+function CallerAddr: Pointer; {$IFNDEF CLR}{$IFNDEF PAS2JS} assembler; {$ENDIF}{$ENDIF}
   {$IFDEF HAS_BUILTIN_RETURNADDRESS}deprecated 'Use ReturnAddress';{$ENDIF}
+{$IFDEF PAS2JS}
+function ExceptAddr: Pointer;
+{$ENDIF}
 function PtrToStr(p: Pointer): string;
 function PointerToLocationInfo(Addrs: Pointer): string;
 function PointerToAddressInfo(Addrs: Pointer):  string;
@@ -851,7 +905,9 @@ function IsDecorator(aTest: ITest): Boolean;
 function GetDUnitRegistryKey: string;
 procedure SetDUnitRegistryKey(const NewKey: string);
 {$IFNDEF CLR}  // - unsuitable for .NET, pointer magic
+{$IFNDEF PAS2JS}
 function FirstByteDiff(p1, p2: pointer; size: longword; out b1, b2: byte): integer;
+{$ENDIF}
 {$ENDIF}
 
 function MemLeakMonitor: IMemLeakMonitor;
@@ -892,6 +948,7 @@ uses
   System.Collections.Generic,
 {$ENDIF CLR}
 {$ENDIF GENERICS}
+
 {$IFDEF USE_JEDI_JCL}
   JclDebug,
 {$ENDIF}
@@ -913,7 +970,7 @@ uses
   Posix.SysTime;
 {$ENDIF}
 {$IFDEF MSWINDOWS_OR_CLR}
-                                                             
+
 {$IFNDEF CLR}
   Winapi.Windows,
   System.Win.Registry;
@@ -922,6 +979,9 @@ uses
   Registry;
 {$ENDIF !CLR}
 {$ENDIF MSWINDOWS_OR_CLR}
+{$IFDEF PAS2JS}
+  Rtti, web;
+{$ENDIF}
 
 {$STACKFRAMES ON} // Required to retrieve caller's address
 
@@ -952,6 +1012,9 @@ begin
 {$IFDEF LINUX}
    Result := ExpandFileName(Format('%s.%1:s', [ExtractFilePath(ParamStr(0)),PathDelim])); // Current directory
 {$ENDIF LINUX}
+{$IFDEF PAS2JS}
+  Result := '';
+{$ENDIF}
 end;
 
 procedure CopyTmpFiles;
@@ -1128,18 +1191,32 @@ begin
   Result := TMemLeakMonitor.Create;
 end;
 
+{$IFNDEF PAS2JS}
 type
   TMemIniFileTrimmed = class(TMemIniFile)
   public
     // Override the read string method to trim the string for compatibility with TIniFile
     function ReadString(const Section, Ident, DefaultStr: string): string; override;
   end;
+{$ENDIF}
 
 var
   // SubKey of HKEY_CURRENT_USER for storing configurations in the registry (end with \)
   DUnitRegistryKey: string = ''; // How about 'Software\DUnitTests\';
 
 {$IFNDEF MSWINDOWS_OR_CLR}
+{$IFDEF PAS2JS}
+function QueryPerformanceCounter(var PerformanceCounter: Int64): Boolean;
+begin
+  Result := true;
+end;
+
+function QueryPerformanceFrequency(var Frequency: Int64): Boolean;
+begin
+  Frequency := 1000;
+  Result := true;
+end;
+{$ELSE}
 
 var
   PerformanceCounterInitValue: Int64;
@@ -1169,6 +1246,7 @@ begin
   Frequency := 1000;
   Result := true;
 end;
+{$ENDIF PAS2JS}
 {$ENDIF MSWINDOWS_OR_CLR}
 
 {: Convert a pointer into its string representation }
@@ -1177,6 +1255,7 @@ begin
    Result := Format('%p', [p])
 end;
 
+{$IFNDEF PAS2JS}
 function IsBadPointer(P: Pointer):Boolean; {$IFNDEF CLR} register; {$ENDIF}
 begin
   try
@@ -1188,7 +1267,7 @@ begin
     Result := true;
   end
 end;
-
+{$ENDIF}
                                                                                                  
 {$IFNDEF HAS_BUILTIN_RETURNADDRESS}
 function ReturnAddress: Pointer; {$IFNDEF PUREPASCAL} assembler; {$ENDIF}
@@ -1248,6 +1327,13 @@ begin
   Result := nil;
 end;
 {$IFEND}
+
+{$IFDEF PAS2JS}
+function ExceptAddr: Pointer;
+begin
+  Result := nil;
+end;
+{$ENDIF}
 
 {$IFNDEF USE_JEDI_JCL}
 
@@ -1361,7 +1447,8 @@ begin
   DUnitRegistryKey := NewKey;
 end;
 
-{$IFNDEF CLR} // KGS: not expected to work in .NET, pointer magic follows
+{$IFNDEF PAS2JS}
+{$IFNDEF CLR} // KGS: not expected to work in .NET, pointer magic follows{$IFNDEF
 function ByteAt(p: pointer; const Offset: integer): byte;
 begin
   Result:=pByte(NativeInt(p)+Offset)^;
@@ -1385,8 +1472,10 @@ begin
     end;
 end;
 {$ENDIF}
+{$ENDIF}
 
 {$IFNDEF CLR}
+{$IFNDEF PAS2JS}
 function CompareCharArray(const Buff1, Buff2: TCharArray; Len: Integer): Boolean; overload;
 var
   ActualLen: LongWord;
@@ -1438,8 +1527,8 @@ function CompareByteArray(const Buff1, Buff2: TBytes): Boolean; overload;
 begin
   Result := CompareByteArray(Buff1, Buff2, MaxInt);
 end;
+{$ENDIF !PAS2JS}
 {$ENDIF !CLR}
-
 
 { TTestResult }
 
@@ -1465,16 +1554,20 @@ var
 begin
   for i := 0 to fErrors.Count - 1 do
   begin
+{$IFNDEF PAS2JS}
 {$IFNDEF NEXTGEN}
     TTestFailure(fErrors[i]).Free;
 {$ENDIF !NEXTGEN}
+{$ENDIF !PAS2JS}
   end;
   FErrors.Free;
   for i := 0 to fFailures.Count - 1 do
   begin
+{$IFNDEF PAS2JS}
 {$IFNDEF NEXTGEN}
     TTestFailure(fFailures[i]).Free;
 {$ENDIF !NEXTGEN}
+{$ENDIF !PAS2JS}
   end;
   FFailures.Free;
   inherited;
@@ -1715,7 +1808,9 @@ begin
       if RunTestSetUp(test) then
       begin
         // See if Setup Leaked.
+        {$IFNDEF PAS2JS}
         (TestCaseMemLeakMonitor as IMemLeakMonitor).MemLeakDetected(SetupMemDiff);
+        {$ENDIF}
         {$IFDEF USE_JEDI_JCL}
         { JclClearGlobalStackData is called before and after the test to make sure
           that global stack data, which was generated by a trapped exception, wont
@@ -1730,12 +1825,16 @@ begin
         //Not all calls to RunTestRun call Test Procedures so check if this was.
         TestProcExecuted := isTestMethod(test);
 
+        {$IFNDEF PAS2JS}
         if TestProcExecuted and test.FailsOnMemoryLeak then
           (TestProcMemLeakMonitor as IMemLeakMonitor).MemLeakDetected(TestProcMemdiff);
+        {$ENDIF}
       end;
       TestProcMemLeakMonitor.MarkMemInUse;
       RunTestTearDown(test);
+      {$IFNDEF PAS2JS}
       (TestProcMemLeakMonitor as IMemLeakMonitor).MemLeakDetected(TearDownMemDiff);
+      {$ENDIF}
 
       // Reporting of test success is delayed from within RunTestRun so mem leak
       // can be flagged as failure at testcase level encompasing all of
@@ -2018,6 +2117,7 @@ begin
   Result := FRunCount;
 end;
 
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.LoadConfiguration(const fileName: string; const useRegistry, useMemIni: Boolean);
 var
   f: TCustomIniFile;
@@ -2078,6 +2178,7 @@ begin
   else
     iniFile.WriteInteger(section, self.GetName+'.RunCount', self.GetRunCount);
 end;
+{$ENDIF}
 
 function TAbstractTest.Run: TTestResult;
 var
@@ -2365,6 +2466,7 @@ begin
 end;
 
 {$IFNDEF NEXTGEN}
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckEquals(expected, actual: ShortString; msg: string = '');
 begin
   FCheckCalled := True;
@@ -2375,6 +2477,7 @@ begin
 {$ENDIF}
     FailNotEquals(WideString(expected), WideString(actual), msg, ReturnAddress);
 end;
+{$ENDIF !PAS2JS}
 {$ENDIF !NEXTGEN}
 
 procedure TAbstractTest.CheckEqualsString(expected, actual: string; msg: string = '');
@@ -2387,12 +2490,14 @@ end;
 {$IFNDEF CLR}
 {$IFNDEF NEXTGEN}
 {$IFDEF UNICODE}
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckEquals(expected, actual: RawByteString; msg: string = '');
 begin
   FCheckCalled := True;
   if expected <> actual then
     FailNotEquals(WideString(expected), WideString(actual), msg, ReturnAddress);
 end;
+{$ENDIF !PAS2JS}
 {$ELSE !UNICODE}
 procedure TAbstractTest.CheckEquals(expected, actual: WideString; msg: string = '');
 begin
@@ -2410,6 +2515,7 @@ begin
 end;
 {$ENDIF !NEXTGEN}
 
+{$IFNDEF PAS2JS}
 function TAbstractTest.GetMemDiffStr(expected, actual: pointer; size:longword; msg:string):string;
 var
   db1, db2: byte;
@@ -2419,13 +2525,16 @@ begin
   Result:=NotEqualsErrorMessage(IntToHex(db1,2),IntToHex(db2,2),msg);
   Result:=Result+' at Offset = '+IntToHex(Offset,4)+'h';
 end;
+{$ENDIF}
 
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckEqualsMem(expected, actual: pointer; size:longword; msg:string='');
 begin
   FCheckCalled := True;
   if not CompareMem(expected, actual, size) then
     Fail(GetMemDiffStr(expected, actual, size, msg), ReturnAddress);
 end;
+{$ENDIF}
 {$ELSE !CLR}
 {$IFNDEF NEXTGEN}
 procedure TAbstractTest.CheckEquals(expected, actual: AnsiString; msg: string = '');
@@ -2445,6 +2554,7 @@ begin
 end;
 
 {$IFNDEF NEXTGEN}
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckNotEquals(expected, actual: ShortString; msg: string = '');
 begin
   FCheckCalled := True;
@@ -2455,6 +2565,7 @@ begin
 {$ENDIF}
     FailEquals(WideString(expected), WideString(actual), msg, ReturnAddress);
 end;
+{$ENDIF}
 {$ENDIF !NEXTGEN}
 
 procedure TAbstractTest.CheckNotEqualsString(expected, actual: string; msg: string = '');
@@ -2467,12 +2578,14 @@ end;
 {$IFNDEF CLR}
 {$IFNDEF NEXTGEN}
 {$IFDEF UNICODE}
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckNotEquals(expected, actual: RawByteString; msg: string = '');
 begin
   FCheckCalled := True;
   if expected = actual then
     FailEquals(WideString(expected), WideString(actual), msg, ReturnAddress);
 end;
+{$ENDIF}
 {$ELSE !UNICODE}
 procedure TAbstractTest.CheckNotEquals(const expected, actual: WideString; msg: string = '');
 begin
@@ -2491,6 +2604,7 @@ end;
 {$ENDIF !NEXTGEN}
 
 // Expected not to work under CLR (pointer based) - KGS
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckNotEqualsMem(expected, actual: pointer; size:longword; msg:string='');
 begin
   FCheckCalled := True;
@@ -2500,6 +2614,7 @@ begin
     Fail(sIdenticalContent + msg, ReturnAddress);
   end;
 end;
+{$ENDIF}
 {$ENDIF !CLR}
 
 procedure TAbstractTest.CheckEquals(expected, actual: integer; msg: string);
@@ -2523,13 +2638,14 @@ begin
     FailNotEquals(IntToStr(expected), IntToStr(actual), msg, ReturnAddress);
 end;
 
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckEquals(expected, actual: uint64; msg: string);
 begin
   FCheckCalled := True;
   if (expected <> actual) then
     FailNotEquals(UIntToStr(expected), UIntToStr(actual), msg, ReturnAddress);
 end;
-
+{$ENDIF}
 
 procedure TAbstractTest.CheckNotEquals(expected, actual: integer; msg: string = '');
 begin
@@ -2716,6 +2832,11 @@ end;
 {$ENDIF CLR}
 {$ENDIF !NEXTGEN}
 
+{$IFDEF PAS2JS}
+var
+  BooleanIdents: array [Boolean] of string = ('False', 'True');
+{$ENDIF}
+
 function TAbstractTest.BoolToStr(ABool: Boolean): string;
 begin
   Result := BooleanIdents[aBool];
@@ -2743,6 +2864,7 @@ begin
 end;
 
 {$IFNDEF CLR}
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckMethodIsNotEmpty(MethodPointer: pointer);
 const
   AssemblerRet = $C3;
@@ -2750,6 +2872,7 @@ begin
   if byte(MethodPointer^) = AssemblerRet then
     Fail(sEmptyTest, MethodPointer);
 end;
+{$ENDIF}
 {$ENDIF}
 
 procedure TAbstractTest.CheckException(AMethod: TTestMethod; AExceptionClass: TClass; msg :string);
@@ -2787,6 +2910,7 @@ begin
 end;
 
 {$IFNDEF CLR}
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckEquals(expected, actual: TCharArray; msg: string);
 begin
   FCheckCalled := True;
@@ -2794,6 +2918,7 @@ begin
   if CompareCharArray(expected, actual) = False then
     FailNotEquals(string(expected), string(actual), msg, ReturnAddress);
 end;
+{$ENDIF}
 
 //procedure TAbstractTest.CheckEquals(expected, actual: TBytes; msg: string);
 //begin
@@ -2988,6 +3113,7 @@ begin
 end;
 
 {$IFNDEF CLR}
+{$IFNDEF PAS2JS}
 procedure TAbstractTest.CheckNotEquals(expected, actual: TCharArray;
   msg: string);
 begin
@@ -2996,6 +3122,7 @@ begin
   if CompareCharArray(expected, actual) = True then
     FailEquals(string(expected), string(actual), msg, ReturnAddress);
 end;
+{$ENDIF}
 
 //procedure TAbstractTest.CheckNotEquals(expected, actual: TBytes; msg: string);
 //begin
@@ -3027,12 +3154,16 @@ begin
 {$IFDEF CLR}
   FMethod := MethodName;
 {$ELSE}
+  {$IFDEF PAS2JS}
+  FMethod := TJSFunction(TJSObject(Self)[MethodName]);
+  {$ELSE}
   RunMethod.code := MethodAddress(MethodName);
   RunMethod.Data := self;
   FMethod := TTestMethod(RunMethod);
 
   assert(assigned(FMethod));
-                                                                        
+  {$ENDIF}
+
   FRunCount := RunCount;
 {$ENDIF}
 end;
@@ -3048,7 +3179,11 @@ begin
       raise E.InnerException;
   end;
 {$ELSE}
+  {$IFDEF PAS2JS}
+  AMethod.apply(TJSObject(Self), []);
+  {$ELSE}
   AMethod;
+  {$ENDIF}
 {$ENDIF}
 end;
 
@@ -3076,8 +3211,12 @@ begin
 {$IFDEF CLR}
       testResult.FMethodPtr := nil;
 {$ELSE}
+  {$IFDEF PAS2JS}
+      testResult.FMethodPtr := nil;
+  {$ELSE}
       CheckMethodIsNotEmpty(tMethod(FMethod).Code);
       testResult.FMethodPtr := tMethod(FMethod).Code;
+  {$ENDIF}
 {$ENDIF}
       FCheckCalled := False;
                                                                                  
@@ -3247,6 +3386,7 @@ begin
   {$ENDIF !CLR}
 end;
 
+{$IFNDEF PAS2JS}
 constructor TTestSuite.Create(AName: string; const Tests: array of ITest);
 var
   i: Integer;
@@ -3259,6 +3399,7 @@ begin
   //SysDebug('> ', []);
   {$ENDIF !CLR}
 end;
+{$ENDIF}
 
 procedure TTestSuite.AddTest(ATest: ITest);
 begin
@@ -3387,6 +3528,7 @@ begin
   Result := FTests;
 end;
 
+{$IFNDEF PAS2JS}
 procedure TTestSuite.LoadConfiguration(const iniFile: TCustomIniFile; const section: string);
 var
   i    : integer;
@@ -3399,7 +3541,9 @@ begin
   for i := 0 to LTests.count-1 do
     (LTests[i] as ITest).LoadConfiguration(iniFile, TestSection);
 end;
+{$ENDIF}
 
+{$IFNDEF PAS2JS}
 procedure TTestSuite.SaveConfiguration(const iniFile: TCustomIniFile; const section: string);
 var
   i    : integer;
@@ -3412,6 +3556,7 @@ begin
   for i := 0 to LTests.count-1 do
     (LTests[i] as ITest).SaveConfiguration(iniFile, TestSection);
 end;
+{$ENDIF}
 
 { ETestFailure }
 
@@ -3439,12 +3584,14 @@ end;
 
 { TMemIniFileTrimmed }
 
+{$IFNDEF PAS2JS}
 function TMemIniFileTrimmed.ReadString(const Section, Ident,
   DefaultStr: string): string;
 begin
   // Trim the result for compatibility with TIniFile
   Result := Trim(inherited ReadString(Section, Ident, DefaultStr));
 end;
+{$ENDIF}
 
 { TMethodEnumerator }
 
@@ -3476,8 +3623,8 @@ begin
       FMethodNameList.Add(Methods[I].Name);
 end;
 {$ELSE}
-                                                            
-{$IF DEFINED(CPUX64) AND DEFINED(RTTI)}
+
+{$IF (DEFINED(CPUX64) AND DEFINED(RTTI)) OR DEFINED(PAS2JS)}
 var
   I: Integer;
   LMethod: TRttiMethod;
@@ -3486,7 +3633,9 @@ begin
   if AClass <> nil then
     for LMethod in TRttiContext.Create.GetType(AClass).GetMethods do
       if LMethod.Visibility = mvPublished then
+        {$IFNDEF PAS2JS}
         if LMethod.VirtualIndex >= 0 then
+        {$ENDIF}
         begin
           I := Low(FMethodNameList);
           while (I <= High(FMethodNameList)) and (LMethod.Name <> FMethodNameList[I]) do
@@ -3572,6 +3721,7 @@ end;
 
 { Convenience routines }
 
+{$IFNDEF PAS2JS}
 function  TestSuite(AName: string; const Tests: array of ITest): ITestSuite;
 begin
   Result := TTestSuite.Create(AName, Tests);
@@ -3579,6 +3729,7 @@ begin
   //SysDebug('Creando TestSuite <%s>(%d) ', [AName,Length(Tests)]);
   {$ENDIF !CLR}
 end;
+{$ENDIF}
 
 { test registry }
 
@@ -3659,7 +3810,9 @@ procedure CreateRegistry;
 var
   MyName : string;
 begin
-{$IF defined(ANDROID)}
+{$IF defined(PAS2JS)}
+  MyName := ParamStr(0);
+{$ELSEIF defined(ANDROID)}
   MyName := GetPackageName;
 {$ELSEIF defined(IOS)}
   MyName := ExtractFileName(ParamStr(0));
@@ -3688,6 +3841,7 @@ begin
   RegisterTest('', test);
 end;
 
+{$IFNDEF PAS2JS}
 procedure RegisterTests(SuitePath: string; const Tests: array of ITest);
 var
   i: Integer;
@@ -3696,17 +3850,29 @@ begin
     TestFramework.RegisterTest(SuitePath, Tests[i])
   end
 end;
+{$ENDIF}
 
+{$IFNDEF PAS2JS}
 procedure RegisterTests(const Tests: array of ITest);
 begin
   RegisterTests('', Tests);
 end;
+{$ENDIF}
 
 function RegisteredTests: ITestSuite;
 begin
   Result := __TestRegistry;
 end;
 
+{$IFDEF PAS2JS}
+function RunTest(suite: ITest; const listener: ITestListener): TTestResult; overload;
+begin
+  Result := TTestResult.Create;
+  result.addListener(listener);
+  if suite <> nil then
+    suite.Run(result);
+end;
+{$ELSE}
 function RunTest(suite: ITest; const listeners: array of ITestListener): TTestResult; overload;
 var
   i        : Integer;
@@ -3717,7 +3883,19 @@ begin
   if suite <> nil then
     suite.Run(result);
 end;
+{$ENDIF}
 
+{$IFDEF PAS2JS}
+function RunRegisteredTests(const listener: ITestListener): TTestResult;
+begin
+  try
+    CopyTmpFiles;
+    Result := RunTest(RegisteredTests, listener);
+  finally
+    DeleteTmpFiles;
+  end;
+end;
+{$ELSE}
 function RunRegisteredTests(const listeners: array of ITestListener): TTestResult;
 begin
   try
@@ -3727,6 +3905,7 @@ begin
     DeleteTmpFiles;
   end;
 end;
+{$ENDIF}
 
 procedure ClearRegistry;
 begin
@@ -3995,8 +4174,11 @@ initialization
 {$IFDEF LINUX}
   InitPerformanceCounter;
 {$ENDIF}
+{$IFNDEF PAS2JS}
 finalization
   ClearRegistry;
+{$ENDIF}
+
 {$IF CompilerVersion >= 24.0}
 {$LEGACYIFEND OFF}
 {$ENDIF}

@@ -317,9 +317,11 @@ begin
   FErrorCount := 0;
 {$IFNDEF CLR}
   Writeln;
+  {$IFNDEF PAS2JS}
   Writeln('Executing: "'+Paramstr(0)+'"');
   Writeln('DataFiles: "'+TestDataDir+'"');
   Writeln('OSVersion: "'+TOSVersion.ToString+'"');
+  {$ENDIF}
 {$ENDIF CLR}
   Writeln;
   Writeln(sDUnitTesting);
@@ -341,12 +343,18 @@ end;
 
 class function TTextTestListener.RunTest(suite: ITest; exitBehavior: TRunnerExitBehavior = rxbContinue): TTestResult;
 begin
+  {$IFDEF PAS2JS}
+  Result := TestFramework.RunTest(suite, TTextTestListener.Create);
+  {$ELSE}
   Result := TestFramework.RunTest(suite, [TTextTestListener.Create]);
+  {$ENDIF}
   case exitBehavior of
     rxbPause:
       try
         writeln(sPressReturn);
+        {$IFNDEF PAS2JS}
         readln
+        {$ENDIF}
       except
       end;
     rxbHaltOnFailures:
@@ -354,7 +362,11 @@ begin
       with Result do
       begin
         if not WasSuccessful then
+          {$IFDEF PAS2JS}
+          ;
+          {$ELSE}
           System.Halt(ErrorCount+FailureCount);
+          {$ENDIF}
       end
 {$ENDIF}
     // else fall through
@@ -363,17 +375,27 @@ end;
 
 class function TTextTestListener.RunRegisteredTests(exitBehavior: TRunnerExitBehavior = rxbContinue): TTestResult;
 begin
+  {$IFDEF PAS2JS}
+  Result := TTextTestListener.RunTest(registeredTests, exitBehavior);
+  {$ELSE}
   Result := RunTest(registeredTests, exitBehavior);
+  {$ENDIF}
 end;
 
 function RunTest(suite: ITest; exitBehavior: TRunnerExitBehavior = rxbContinue): TTestResult;
 begin
+  {$IFDEF PAS2JS}
+  Result := TestFramework.RunTest(suite, TTextTestListener.Create);
+  {$ELSE}
   Result := TestFramework.RunTest(suite, [TTextTestListener.Create]);
+  {$ENDIF}
   case exitBehavior of
     rxbPause:
       try
         writeln(sPressReturn);
+        {$IFNDEF PAS2JS}
         readln
+        {$ENDIF}
       except
       end;
     rxbHaltOnFailures:
@@ -381,7 +403,11 @@ begin
       with Result do
       begin
         if not WasSuccessful then
+          {$IFDEF PAS2JS}
+          ;
+          {$ELSE}
           System.Halt(ErrorCount+FailureCount);
+          {$ENDIF}
       end
 {$ENDIF}
     // else fall through
